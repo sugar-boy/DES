@@ -53,6 +53,19 @@ namespace DES
             //41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48,
             //44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32,
         };
+        private readonly int[] fourthArray = new int[48]
+        {
+            31, 0 , 1 , 2 , 3 , 4 , 3 , 4 , 5 , 6 , 7 , 8 ,
+            7 , 8 , 9 , 10, 11, 12, 11, 12, 13, 14, 15, 16,
+            15, 16, 17, 18, 19, 20, 19, 20, 21, 22, 23, 24,
+            23, 24, 25, 26, 27, 28, 27, 28, 29, 30, 31, 0 ,
+
+            //32, 1 , 2 , 3 , 4 , 5 , 4 , 5 , 6 , 7 , 8 , 9 ,
+            //8 , 9 , 10, 11, 12, 13, 12, 13, 14, 15, 16, 17,
+            //16, 17, 18, 19, 20, 21, 20, 21, 22, 23, 24, 25,
+            //24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1 ,
+
+        };
 
         public Form1()
         {
@@ -63,8 +76,6 @@ namespace DES
         {
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
-            string cnt;
-            string cnt1 = "";
 
             CorrectStringLength(ref text);
             CorrectStringLength(ref key);
@@ -73,25 +84,25 @@ namespace DES
             key = ConvertBinary(ConvertASCII(key));
 
             FirstPermutation(text, out string resultText);
-            SecondPermutation(key, out string resultKey);
+            PermutationArray(key, secondArray, out string resultKey);
 
             Division(resultText, out string divisionLeftText, out string divisionRightText);
             Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
 
-            for (int i = 1; i <= 16; i++)
+            for (int i = 1; i < 2; i++)
             {
                 KeyBitShift(divisionLeftKey, i, out string resultLeft);
                 KeyBitShift(divisionRightKey, i, out string resultRight);
-                cnt = resultLeft + resultRight;
-                for (int j = 0; j < thirdArray.Length; j++)
-                {
-                    cnt1 += cnt[thirdArray[i]];
-                }
+                string cnt = resultLeft + resultRight;
+
+                PermutationArray(cnt, thirdArray, out string result);
+
+                PermutationArray(divisionRightText, fourthArray, out string result1);
+                textBox3.Text = XOR(result, result1);
+
+
 
             }
-            textBox3.Text = cnt1;
-
-
 
         }
 
@@ -140,12 +151,12 @@ namespace DES
             }
         }
 
-        private void SecondPermutation(string key, out string result) // делаем 1-ую перестановку ключа по второму массиву
+        private void PermutationArray(string text, int[] array, out string result) // делаем 1-ую перестановку ключа по второму массиву
         {
             result = "";
-            for (int i = 0; i < secondArray.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
-                result += key[secondArray[i]];
+                result += text[array[i]];
             }
         }
 
@@ -166,7 +177,24 @@ namespace DES
                 else
                     result = text.Substring(2, text.Length - 2) + text.Substring(0, 2);
                 text = result;
+            } 
+        } // сдвиг битов
+
+        private string XOR(string one, string two)
+        {
+            string result = "";
+
+            for (int i = 0; i < one.Length; i++)
+            {
+                bool a = Convert.ToBoolean(Convert.ToInt32(one[i].ToString()));
+                bool b = Convert.ToBoolean(Convert.ToInt32(two[i].ToString()));
+
+                if (a ^ b)
+                    result += "1";
+                else
+                    result += "0";
             }
+            return result;
         }
 
     }
