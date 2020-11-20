@@ -1,0 +1,15 @@
+C:\Users\User\source\repos\DES\DES\bin\Debug\netcoreapp3.1\DES.exe
+C:\Users\User\source\repos\DES\DES\bin\Debug\netcoreapp3.1\DES.deps.json
+C:\Users\User\source\repos\DES\DES\bin\Debug\netcoreapp3.1\DES.runtimeconfig.json
+C:\Users\User\source\repos\DES\DES\bin\Debug\netcoreapp3.1\DES.runtimeconfig.dev.json
+C:\Users\User\source\repos\DES\DES\bin\Debug\netcoreapp3.1\DES.dll
+C:\Users\User\source\repos\DES\DES\bin\Debug\netcoreapp3.1\DES.pdb
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.csprojAssemblyReference.cache
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.Form1.resources
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.csproj.GenerateResource.cache
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.AssemblyInfoInputs.cache
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.AssemblyInfo.cs
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.csproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.dll
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.pdb
+C:\Users\User\source\repos\DES\DES\obj\Debug\netcoreapp3.1\DES.genruntimeconfig.cache
