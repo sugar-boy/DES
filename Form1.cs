@@ -15,7 +15,7 @@ namespace DES
 
         private const int sizeOfBlock = 64; // размер принимаемого текста в битах
         private const int sizeOfChar = 8; // размер одного символа
-        private readonly int[] firstArray = new int[64] 
+        private readonly int[] firstArray = new int[64]
         {
             57, 49, 41, 33, 25, 17, 9 , 1, 59, 51, 43, 35, 27, 19, 11, 3,
             61, 53, 45, 37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7,
@@ -28,7 +28,7 @@ namespace DES
             //61, 53, 45, 37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7
 
         }; // массив начальной перестановки битов сообщения
-        private readonly int[] secondArray = new int[56] 
+        private readonly int[] secondArray = new int[56]
         {
             56, 48, 40, 32, 24, 16, 8 , 0 , 57, 49, 41, 33, 25, 17,
             9 , 1 , 58, 50, 42, 34, 26, 18, 10, 2 , 59, 51, 43, 35,
@@ -66,6 +66,13 @@ namespace DES
             //24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1 ,
 
         };
+        private readonly int[,] S_1 = new int[,]
+        {
+            {14,  4, 13,  1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9,  0,  7 },
+            { 0, 15,  7,  4, 14,  2, 13,  1, 10,  6, 12, 11,  9,  5,  3,  8 },
+            { 4,  1, 14,  8, 13,  6,  2, 11, 15, 12,  9,  7,  3, 10,  5,  0 },
+            {15, 12,  8,  2,  4,  9,  1,  7,  5, 11,  3, 14, 10,  0,  6, 13 }
+        };
 
         public Form1()
         {
@@ -76,6 +83,8 @@ namespace DES
         {
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
+            string result = "";
+            string cnt = "";
 
             CorrectStringLength(ref text);
             CorrectStringLength(ref key);
@@ -83,24 +92,29 @@ namespace DES
             text = ConvertBinary(ConvertASCII(text));
             key = ConvertBinary(ConvertASCII(key));
 
-            FirstPermutation(text, out string resultText);
+            PermutationArray(text, firstArray, out string resultText);
             PermutationArray(key, secondArray, out string resultKey);
 
-            Division(resultText, out string divisionLeftText, out string divisionRightText);
+            Division(resultText, out string divisionLeftText, out string divisionRightText);;
             Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
 
             for (int i = 1; i < 2; i++)
             {
-                KeyBitShift(divisionLeftKey, i, out string resultLeft);
-                KeyBitShift(divisionRightKey, i, out string resultRight);
-                string cnt = resultLeft + resultRight;
+                int n = 0;
+                string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
 
-                PermutationArray(cnt, thirdArray, out string result);
+                PermutationArray(cnt_K, thirdArray, out string result_K);
+                PermutationArray(divisionRightText, fourthArray, out string result_R);
 
-                PermutationArray(divisionRightText, fourthArray, out string result1);
-                textBox3.Text = XOR(result, result1);
+                text = XOR(result_K, result_R);
 
-
+                for (int j = 1; j <= 8; j++)
+                {
+                    cnt = text.Substring(n, 6);
+                    int number = S_1[cnt[0], cnt[5]];
+                    result += Convert.ToString(number, 2);
+                    n += 6;
+                }
 
             }
 
@@ -142,15 +156,6 @@ namespace DES
             return result;
         }
 
-        private void FirstPermutation(string text, out string result) // делаем 1-ую перестановку текста по первому массиву
-        {
-            result = "";
-            for (int i = 0; i < text.Length; i++)
-            {
-                result += text[firstArray[i]];
-            }
-        }
-
         private void PermutationArray(string text, int[] array, out string result) // делаем 1-ую перестановку ключа по второму массиву
         {
             result = "";
@@ -166,9 +171,9 @@ namespace DES
             divisionRight = text.Substring(text.Length / 2, text.Length / 2);
         }
 
-        private void KeyBitShift(string text, int number, out string result)
+        private string KeyBitShift(string text, int number)
         {
-            result = "";
+            string result = "";
 
             for (int i = 1; i <= number; i++)
             {
@@ -177,7 +182,8 @@ namespace DES
                 else
                     result = text.Substring(2, text.Length - 2) + text.Substring(0, 2);
                 text = result;
-            } 
+            }
+            return result;
         } // сдвиг битов
 
         private string XOR(string one, string two)
