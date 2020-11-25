@@ -198,13 +198,11 @@ namespace DES
 
             cnt = divisionLeftText + divisionRightText;
             PermutationArray(cnt, sixArray, out string resultLR);
+
             long[] dnt = ConvertDecimical(resultLR, 8);
-            cnt = "";
-            foreach (var item in dnt)
-            {
-                cnt += item + " ";
-            }
-            textBox4.Text = cnt;
+            textBox3.Text = ConvertASCII(dnt);
+
+            
         }
 
         private void CorrectStringLength(ref string text) // доводим текст до требуемой длины
@@ -226,6 +224,17 @@ namespace DES
 
             }
             return array;
+        }
+
+        private string ConvertASCII(long[] array) // переводим символ в ASCII
+        {
+            byte[] bytes = new byte[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                bytes[i] = (byte)array[i];
+            }
+
+            return Encoding.GetEncoding(1251).GetString(bytes);
         }
         private string ConvertBinary(int[] arrayASCII, int sizeOfChar) // конвертируем строку в 2-ичный код
         {
