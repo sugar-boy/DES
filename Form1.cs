@@ -14,7 +14,6 @@ namespace DES
     {
 
         private const int sizeOfBlock = 64; // размер принимаемого текста в битах
-        private const int sizeOfChar = 8; // размер одного символа
 
         private readonly int[] firstArray = new int[64]
         {
@@ -66,6 +65,26 @@ namespace DES
             //16, 17, 18, 19, 20, 21, 20, 21, 22, 23, 24, 25,
             //24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1 ,
 
+        };
+        private readonly int[] fiveArray = new int[32]
+        {
+             15, 6, 19, 20, 28, 11, 27, 16,  0, 14, 22, 25,  4, 17, 30,  9,
+              1, 7, 23, 13, 31, 26,  2,  8, 18, 12, 29,  5, 21, 10,  3, 24
+
+            //16, 7 , 20, 21, 29, 12, 28, 17, 1 , 15, 23, 26, 5 , 18, 31, 10,
+            // 2 , 8 , 24, 14, 32, 27, 3 , 9 , 19, 13, 30, 6 , 22, 11, 4 , 25
+        };
+        private readonly int[] sixArray = new int[64]
+        {
+            39, 7, 47, 15, 55, 23, 63, 31, 38, 6, 46, 14, 54, 22, 62, 30,
+            37, 5, 45, 13, 53, 21, 61, 29, 36, 4, 44, 12, 52, 20, 60, 28,
+            35, 3, 43, 11, 51, 19, 59, 27, 34, 2, 42, 10, 50, 18, 58, 26,
+            33, 1, 41,  9, 49, 17, 57, 25, 32, 0, 40,  8, 48, 16, 56, 24
+
+            //40, 8, 48, 16, 56, 24, 64, 32, 39, 7, 47, 15, 55, 23, 63, 31,
+            //38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29,
+            //36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19, 59, 27,
+            //34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9 , 49, 17, 57, 25
         };
 
         private readonly int[,] S_1 = new int[,]
@@ -134,13 +153,14 @@ namespace DES
         {
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
-            string result = "";
+            string cnt = "";
+            int[] result = new int[8];
 
             CorrectStringLength(ref text);
             CorrectStringLength(ref key);
 
-            text = ConvertBinary(ConvertASCII(text));
-            key = ConvertBinary(ConvertASCII(key));
+            text = ConvertBinary(ConvertASCII(text), 8);
+            key = ConvertBinary(ConvertASCII(key), 8);
 
             PermutationArray(text, firstArray, out string resultText);
             PermutationArray(key, secondArray, out string resultKey);
@@ -148,7 +168,7 @@ namespace DES
             Division(resultText, out string divisionLeftText, out string divisionRightText);;
             Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
 
-            for (int i = 1; i < 2; i++)
+            for (int i = 1; i < 16; i++)
             {
                 int n = 0;
                 string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
@@ -166,17 +186,30 @@ namespace DES
                     long r = Convert.ToInt64(row, 2);
                     n += 6;
 
-                    result += Switch(j, l, r);
+                    result[j-1] = Convert.ToInt32(Switch(j, l, r));
                 }
-                textBox4.Text = result;
 
+                PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
+
+                cnt = divisionRightText;
+                divisionRightText = XOR(divisionLeftText, result_P);
+                divisionLeftText = cnt;
             }
 
+            cnt = divisionLeftText + divisionRightText;
+            PermutationArray(cnt, sixArray, out string resultLR);
+            long[] dnt = ConvertDecimical(resultLR, 8);
+            cnt = "";
+            foreach (var item in dnt)
+            {
+                cnt += item + " ";
+            }
+            textBox4.Text = cnt;
         }
 
         private void CorrectStringLength(ref string text) // доводим текст до требуемой длины
         {
-            while ((text.Length * sizeOfChar) % sizeOfBlock != 0)
+            while ((text.Length * 8) % sizeOfBlock != 0)
                 text += "*";
         }
         
@@ -194,7 +227,7 @@ namespace DES
             }
             return array;
         }
-        private string ConvertBinary(int[] arrayASCII) // конвертируем строку в 2-ичный код
+        private string ConvertBinary(int[] arrayASCII, int sizeOfChar) // конвертируем строку в 2-ичный код
         {
             string result = "";
 
@@ -206,6 +239,18 @@ namespace DES
                     symbol_binary = "0" + symbol_binary;
 
                 result += symbol_binary;
+            }
+            return result;
+        }
+
+        private long[] ConvertDecimical(string text, int sizeOfChar) // конвертируем строку в 2-ичный код
+        {
+            long[] result = new long[8];
+            int cnt = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                result[i] = Convert.ToInt32(text.Substring(0 + cnt, sizeOfChar), 2);
+                cnt += 8;
             }
             return result;
         }
@@ -263,28 +308,28 @@ namespace DES
             switch(number)
             {
                 case 1:
-                    result = Convert.ToString(S_1[l, r] + " ");
+                    result += Convert.ToString(S_1[l, r]);
                     break;
                 case 2:
-                    result = Convert.ToString(S_2[l, r] + " ");
+                    result += Convert.ToString(S_2[l, r]);
                     break;
                 case 3:
-                    result = Convert.ToString(S_3[l, r] + " ");
+                    result += Convert.ToString(S_3[l, r]);
                     break;
                 case 4:
-                    result = Convert.ToString(S_4[l, r] + " ");
+                    result += Convert.ToString(S_4[l, r]);
                     break;
                 case 5:
-                    result = Convert.ToString(S_5[l, r] + " ");
+                    result += Convert.ToString(S_5[l, r]);
                     break;
                 case 6:
-                    result = Convert.ToString(S_6[l, r] + " ");
+                    result += Convert.ToString(S_6[l, r]);
                     break;
                 case 7:
-                    result = Convert.ToString(S_7[l, r] + " ");
+                    result += Convert.ToString(S_7[l, r]);
                     break;
                 case 8:
-                    result = Convert.ToString(S_8[l, r] + " ");
+                    result += Convert.ToString(S_8[l, r]);
                     break;
                 default:
                     break;
