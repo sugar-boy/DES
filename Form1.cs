@@ -72,7 +72,7 @@ namespace DES
               1, 7, 23, 13, 31, 26,  2,  8, 18, 12, 29,  5, 21, 10,  3, 24
 
             //16, 7 , 20, 21, 29, 12, 28, 17, 1 , 15, 23, 26, 5 , 18, 31, 10,
-            // 2 , 8 , 24, 14, 32, 27, 3 , 9 , 19, 13, 30, 6 , 22, 11, 4 , 25
+            // 2, 8 , 24, 14, 32, 27, 3 , 9 , 19, 13, 30, 6 , 22, 11, 4 , 25
         };
         private readonly int[] sixArray = new int[64]
         {
@@ -162,13 +162,15 @@ namespace DES
             text = ConvertBinary(ConvertASCII(text), 8);
             key = ConvertBinary(ConvertASCII(key), 8);
 
+            // согласно алгоритму, работает
+
             PermutationArray(text, firstArray, out string resultText);
             PermutationArray(key, secondArray, out string resultKey);
 
             Division(resultText, out string divisionLeftText, out string divisionRightText);;
             Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
 
-            for (int i = 1; i < 16; i++)
+            for (int i = 1; i <= 16; i++)
             {
                 int n = 0;
                 string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
@@ -191,9 +193,13 @@ namespace DES
 
                 PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
 
-                cnt = divisionRightText;
-                divisionRightText = XOR(divisionLeftText, result_P);
-                divisionLeftText = cnt;
+                if(i != 16) 
+                {
+                   cnt = divisionRightText;
+                   divisionRightText = XOR(divisionLeftText, result_P);
+                   divisionLeftText = cnt;
+                }
+
             }
 
             cnt = divisionLeftText + divisionRightText;
@@ -203,6 +209,66 @@ namespace DES
             textBox3.Text = ConvertASCII(dnt);
 
             
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string text = Convert.ToString(textBox3.Text);
+            string key = Convert.ToString(textBox2.Text);
+            string cnt = "";
+            int[] result = new int[8];
+
+            CorrectStringLength(ref text);
+            CorrectStringLength(ref key);
+
+            text = ConvertBinary(ConvertASCII(text), 8);
+            key = ConvertBinary(ConvertASCII(key), 8);
+
+            // согласно алгоритму, работает
+
+            PermutationArray(text, firstArray, out string resultText);
+            PermutationArray(key, secondArray, out string resultKey);
+
+            Division(resultText, out string divisionLeftText, out string divisionRightText); ;
+            Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
+
+            for (int i = 16; i >= 1; i--)
+            {
+                int n = 0;
+                string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
+
+                PermutationArray(cnt_K, thirdArray, out string result_K);
+                PermutationArray(divisionLeftText, fourthArray, out string result_L);
+
+                text = XOR(result_K, result_L);
+                for (int j = 1; j <= 8; j++)
+                {
+                    string line = Convert.ToString(text[n] + "" + text[n + 5]);
+                    long l = Convert.ToInt64(line, 2);
+
+                    string row = text.Substring(n + 1, 4);
+                    long r = Convert.ToInt64(row, 2);
+                    n += 6;
+
+                    result[j - 1] = Convert.ToInt32(Switch(j, l, r));
+                }
+
+                PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
+
+                if (i != 16)
+                {
+                    cnt = divisionLeftText;
+                    divisionLeftText = XOR(divisionRightText, result_P);
+                    divisionRightText = cnt;
+                }
+
+            }
+
+            cnt = divisionLeftText + divisionRightText;
+            PermutationArray(cnt, sixArray, out string resultLR);
+
+            long[] dnt = ConvertDecimical(resultLR, 8);
+            textBox4.Text = ConvertASCII(dnt);
         }
 
         private void CorrectStringLength(ref string text) // доводим текст до требуемой длины
@@ -346,5 +412,6 @@ namespace DES
             return result;
         }
 
+        
     }
 }
