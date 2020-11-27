@@ -218,8 +218,8 @@ namespace DES
 
         private void button2_Click(object sender, EventArgs e)
         {
-            textBox4.Clear();
-            string text = Convert.ToString(textBox3.Text);
+            textBox3.Clear();
+            string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
             string cnt;
             int[] result = new int[8];
@@ -275,7 +275,7 @@ namespace DES
                 PermutationArray(cnt, sixArray, out string resultLR);
 
                 long[] dnt = ConvertDecimical(resultLR, 8);
-                textBox4.Text += ConvertASCII(dnt);
+                textBox3.Text += ConvertASCII(dnt);
             }
 
         }
