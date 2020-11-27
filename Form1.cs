@@ -12,7 +12,6 @@ namespace DES
 {
     public partial class Form1 : Form
     {
-
         private const int sizeOfBlock = 64; // размер принимаемого текста в битах
 
         private readonly int[] firstArray = new int[64]
@@ -151,132 +150,152 @@ namespace DES
 
         private void button1_Click(object sender, EventArgs e)
         {
+            textBox3.Clear();
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
-            string cnt = "";
+            string cnt;
             int[] result = new int[8];
 
-            CorrectStringLength(ref text);
-            CorrectStringLength(ref key);
+            CorrectLength(ref text, ref key);
+            textBox1.Text = text;
+            textBox2.Text = key;
 
-            text = ConvertBinary(ConvertASCII(text), 8);
-            key = ConvertBinary(ConvertASCII(key), 8);
+            string[] rounds = Rounds(text);
 
-            // согласно алгоритму, работает
-
-            PermutationArray(text, firstArray, out string resultText);
-            PermutationArray(key, secondArray, out string resultKey);
-
-            Division(resultText, out string divisionLeftText, out string divisionRightText);;
-            Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
-
-            for (int i = 1; i <= 16; i++)
+            for(int k = 0; k < rounds.Length; k++ )
             {
-                int n = 0;
-                string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
+                text = rounds[k];
 
-                PermutationArray(cnt_K, thirdArray, out string result_K);
-                PermutationArray(divisionRightText, fourthArray, out string result_R);
+                text = ConvertBinary(ConvertASCII(text), 8);
+                key = ConvertBinary(ConvertASCII(key), 8);
 
-                text = XOR(result_K, result_R);
-                for (int j = 1; j <= 8; j++)
+                PermutationArray(text, firstArray, out string resultText);
+                PermutationArray(key, secondArray, out string resultKey);
+
+                Division(resultText, out string divisionLeftText, out string divisionRightText); ;
+                Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
+
+                for (int i = 1; i <= 16; i++)
                 {
-                    string line = Convert.ToString(text[n] + "" + text[n + 5]);
-                    long l = Convert.ToInt64(line, 2);
+                    int n = 0;
+                    string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
 
-                    string row = text.Substring(n + 1, 4);
-                    long r = Convert.ToInt64(row, 2);
-                    n += 6;
+                    PermutationArray(cnt_K, thirdArray, out string result_K);
+                    PermutationArray(divisionRightText, fourthArray, out string result_R);
 
-                    result[j-1] = Convert.ToInt32(Switch(j, l, r));
+                    text = XOR(result_K, result_R);
+                    for (int j = 1; j <= 8; j++)
+                    {
+                        string line = Convert.ToString(text[n] + "" + text[n + 5]);
+                        long l = Convert.ToInt64(line, 2);
+
+                        string row = text.Substring(n + 1, 4);
+                        long r = Convert.ToInt64(row, 2);
+                        n += 6;
+
+                        result[j - 1] = Convert.ToInt32(Switch(j, l, r));
+                    }
+
+                    PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
+
+                    if (i != 16)
+                    {
+                        cnt = divisionRightText;
+                        divisionRightText = XOR(divisionLeftText, result_P);
+                        divisionLeftText = cnt;
+                    }
+
                 }
 
-                PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
+                cnt = divisionLeftText + divisionRightText;
+                PermutationArray(cnt, sixArray, out string resultLR);
 
-                if(i != 16) 
-                {
-                   cnt = divisionRightText;
-                   divisionRightText = XOR(divisionLeftText, result_P);
-                   divisionLeftText = cnt;
-                }
-
+                long[] dnt = ConvertDecimical(resultLR, 8);
+                textBox3.Text += ConvertASCII(dnt);
             }
-
-            cnt = divisionLeftText + divisionRightText;
-            PermutationArray(cnt, sixArray, out string resultLR);
-
-            long[] dnt = ConvertDecimical(resultLR, 8);
-            textBox3.Text = ConvertASCII(dnt);
-
             
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            textBox4.Clear();
             string text = Convert.ToString(textBox3.Text);
             string key = Convert.ToString(textBox2.Text);
-            string cnt = "";
+            string cnt;
             int[] result = new int[8];
 
-            CorrectStringLength(ref text);
-            CorrectStringLength(ref key);
+            string[] rounds = Rounds(text);
 
-            text = ConvertBinary(ConvertASCII(text), 8);
-            key = ConvertBinary(ConvertASCII(key), 8);
-
-            // согласно алгоритму, работает
-
-            PermutationArray(text, firstArray, out string resultText);
-            PermutationArray(key, secondArray, out string resultKey);
-
-            Division(resultText, out string divisionLeftText, out string divisionRightText); ;
-            Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
-
-            for (int i = 16; i >= 1; i--)
+            for (int k = 0; k < rounds.Length; k++)
             {
-                int n = 0;
-                string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
+                text = rounds[k];
 
-                PermutationArray(cnt_K, thirdArray, out string result_K);
-                PermutationArray(divisionLeftText, fourthArray, out string result_L);
+                text = ConvertBinary(ConvertASCII(text), 8);
+                key = ConvertBinary(ConvertASCII(key), 8);
 
-                text = XOR(result_K, result_L);
-                for (int j = 1; j <= 8; j++)
+                PermutationArray(text, firstArray, out string resultText);
+                PermutationArray(key, secondArray, out string resultKey);
+
+                Division(resultText, out string divisionLeftText, out string divisionRightText); ;
+                Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
+
+                for (int i = 16; i >= 1; i--)
                 {
-                    string line = Convert.ToString(text[n] + "" + text[n + 5]);
-                    long l = Convert.ToInt64(line, 2);
+                    int n = 0;
+                    string cnt_K = KeyBitShift(divisionLeftKey, i) + KeyBitShift(divisionRightKey, i);
 
-                    string row = text.Substring(n + 1, 4);
-                    long r = Convert.ToInt64(row, 2);
-                    n += 6;
+                    PermutationArray(cnt_K, thirdArray, out string result_K);
+                    PermutationArray(divisionLeftText, fourthArray, out string result_L);
 
-                    result[j - 1] = Convert.ToInt32(Switch(j, l, r));
+                    text = XOR(result_K, result_L);
+                    for (int j = 1; j <= 8; j++)
+                    {
+                        string line = Convert.ToString(text[n] + "" + text[n + 5]);
+                        long l = Convert.ToInt64(line, 2);
+
+                        string row = text.Substring(n + 1, 4);
+                        long r = Convert.ToInt64(row, 2);
+                        n += 6;
+
+                        result[j - 1] = Convert.ToInt32(Switch(j, l, r));
+                    }
+
+                    PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
+
+                    if (i != 16)
+                    {
+                        cnt = divisionLeftText;
+                        divisionLeftText = XOR(divisionRightText, result_P);
+                        divisionRightText = cnt;
+                    }
+
                 }
 
-                PermutationArray(ConvertBinary(result, 4), fiveArray, out string result_P);
+                cnt = divisionLeftText + divisionRightText;
+                PermutationArray(cnt, sixArray, out string resultLR);
 
-                if (i != 16)
-                {
-                    cnt = divisionLeftText;
-                    divisionLeftText = XOR(divisionRightText, result_P);
-                    divisionRightText = cnt;
-                }
-
+                long[] dnt = ConvertDecimical(resultLR, 8);
+                textBox4.Text += ConvertASCII(dnt);
             }
 
-            cnt = divisionLeftText + divisionRightText;
-            PermutationArray(cnt, sixArray, out string resultLR);
-
-            long[] dnt = ConvertDecimical(resultLR, 8);
-            textBox4.Text = ConvertASCII(dnt);
         }
 
-        private void CorrectStringLength(ref string text) // доводим текст до требуемой длины
+        private void CorrectLength(ref string text, ref string key) // доводим текст до требуемой длиныkey
         {
             while ((text.Length * 8) % sizeOfBlock != 0)
                 text += "*";
+
+            if (key.Length > 8)
+            {
+                key = key.Remove(8);
+            }
+            else
+            {
+                while (key.Length != 8)
+                    key += "*";
+            }
         }
-        
+
         private int[] ConvertASCII(string text) // переводим символ в ASCII
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -352,9 +371,11 @@ namespace DES
             for (int i = 1; i <= number; i++)
             {
                 if (i == 1 || i == 2 || i == 9 || i == 16)
-                    result = text.Substring(1, text.Length - 1) + text.Substring(0, 1);
+                    result = text[1..] + text.Substring(0, 1);
+                //  result = text.Substring(1, text.Length - 1) + text.Substring(0, 1);
                 else
-                    result = text.Substring(2, text.Length - 2) + text.Substring(0, 2);
+                    result = text[2..] + text.Substring(0, 2);
+                // result = text.Substring(2, text.Length - 2) + text.Substring(0, 2);
                 text = result;
             }
             return result;
@@ -410,6 +431,19 @@ namespace DES
                     break;
             }
             return result;
+        }
+
+        private string[] Rounds(string text)
+        {
+            string[] blocks = new string[text.Length / 8];
+            int cnt = 0;
+
+            for(int i = 0; i < blocks.Length; i++)
+            {
+                blocks[i] = text.Substring(0 + cnt, 8);
+                cnt += 8;
+            }
+            return blocks;
         }
 
         
