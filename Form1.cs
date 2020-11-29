@@ -170,7 +170,11 @@ namespace DES
         {
             textBox1.Clear();
             textBox2.Clear();
-            MessageBox.Show("Выберите файл с исходным текстом");
+
+            DialogResult result = MessageBox.Show("Выберите файл с исходным текстом", "Уведомление", MessageBoxButtons.OKCancel);
+            if (result == DialogResult.Cancel)
+                return;
+
             string text = "";
             string key = textBox4.Text;
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -203,7 +207,11 @@ namespace DES
         {
             textBox1.Clear();
             textBox2.Clear();
-            MessageBox.Show("Выберите файл с зашифрованным текстом");
+
+            DialogResult result = MessageBox.Show("Выберите файл с зашифрованным текстом", "Уведомление", MessageBoxButtons.OKCancel);
+            if (result == DialogResult.Cancel)
+                return;
+
             string text = "";
             string key = textBox4.Text;
             OpenFileDialog openFileDialog = new OpenFileDialog();
