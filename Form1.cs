@@ -152,7 +152,6 @@ namespace DES
 
         private void button1_Click(object sender, EventArgs e)
         {
-            textBox3.Clear();
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
             if(CorrectKey(key))
@@ -161,7 +160,6 @@ namespace DES
 
         private void button2_Click(object sender, EventArgs e)
         {
-            textBox3.Clear();
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
             if(CorrectKey(key))
@@ -170,8 +168,7 @@ namespace DES
 
         private void button3_Click_1(object sender, EventArgs e)
         {
-            textBox1.Clear();
-            textBox2.Clear();
+
             string key = textBox4.Text;
 
             if (CorrectKey(key))
@@ -209,8 +206,7 @@ namespace DES
 
         private void button4_Click(object sender, EventArgs e)
         {
-            textBox1.Clear();
-            textBox2.Clear();
+
             string key = textBox4.Text;
 
             if (CorrectKey(key))
@@ -259,6 +255,7 @@ namespace DES
             CorrectLength(ref text);
             textBox1.Text = text;
             textBox2.Text = key;
+            textBox3.Clear();
 
             string[] rounds = Rounds(text);
 
@@ -321,8 +318,8 @@ namespace DES
             int[] result = new int[8];
             string resultEnd = "";
             string[] rounds = Rounds(text);
+            textBox3.Clear();
 
-            
             for (int k = 0; k < rounds.Length; k++)
             {
 
