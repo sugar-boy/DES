@@ -155,7 +155,8 @@ namespace DES
             textBox3.Clear();
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
-            textBox3.Text = Encrypt(text, key);
+            if(CorrectKey(key))
+                textBox3.Text = Encrypt(text, key);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -163,79 +164,87 @@ namespace DES
             textBox3.Clear();
             string text = Convert.ToString(textBox1.Text);
             string key = Convert.ToString(textBox2.Text);
-            textBox3.Text = Decrypt(text, key);
+            if(CorrectKey(key))
+                textBox3.Text = Decrypt(text, key);
         }
 
         private void button3_Click_1(object sender, EventArgs e)
         {
             textBox1.Clear();
             textBox2.Clear();
-
-            DialogResult result = MessageBox.Show("Выберите файл с исходным текстом", "Уведомление", MessageBoxButtons.OKCancel);
-            if (result == DialogResult.Cancel)
-                return;
-
-            string text = "";
             string key = textBox4.Text;
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-            openFileDialog.InitialDirectory = "c:\\";
-            openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            openFileDialog.FilterIndex = 2;
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            if (CorrectKey(key))
             {
-                string filenameRead = openFileDialog.FileName;
-                text = File.ReadAllText(filenameRead);
+                DialogResult result = MessageBox.Show("Выберите файл с исходным текстом", "Уведомление", MessageBoxButtons.OKCancel);
+                if (result == DialogResult.Cancel)
+                    return;
+
+                string text = "";
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filenameRead = openFileDialog.FileName;
+                    text = File.ReadAllText(filenameRead);
+                }
+
+
+                text = Encrypt(text, key);
+                MessageBox.Show("Текст зашифрован, сохраняем в файл");
+
+                if (saveFileDialog.ShowDialog() == DialogResult.Cancel)
+                    return;
+                string filenameWrite = saveFileDialog.FileName;
+                System.IO.File.WriteAllText(filenameWrite, text);
+                MessageBox.Show("Зашифрованный текст сохранен в файл");
             }
-            
-
-            text = Encrypt(text, key);
-            MessageBox.Show("Текст зашифрован, сохраняем в файл");
-
-            if (saveFileDialog.ShowDialog() == DialogResult.Cancel)
-                return;
-            string filenameWrite = saveFileDialog.FileName;
-            System.IO.File.WriteAllText(filenameWrite, text);
-            MessageBox.Show("Зашифрованный текст сохранен в файл");
-
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             textBox1.Clear();
             textBox2.Clear();
-
-            DialogResult result = MessageBox.Show("Выберите файл с зашифрованным текстом", "Уведомление", MessageBoxButtons.OKCancel);
-            if (result == DialogResult.Cancel)
-                return;
-
-            string text = "";
             string key = textBox4.Text;
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-            openFileDialog.InitialDirectory = "c:\\";
-            openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            openFileDialog.FilterIndex = 2;
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            if (CorrectKey(key))
             {
-                string filenameRead = openFileDialog.FileName;
-                text = File.ReadAllText(filenameRead);
-            }
+                DialogResult result = MessageBox.Show("Выберите файл с зашифрованным текстом", "Уведомление", MessageBoxButtons.OKCancel);
+                if (result == DialogResult.Cancel)
+                    return;
 
-            text = Decrypt(text, key);
-            MessageBox.Show("Текст расшифрован, сохраняем в файл");
+                string text = "";
+                
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
 
-            if (saveFileDialog.ShowDialog() == DialogResult.Cancel)
-                return;
-            string filenameWrite = saveFileDialog.FileName;
-            System.IO.File.WriteAllText(filenameWrite, text);
-            MessageBox.Show("Полученный текст сохранен в файле");
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filenameRead = openFileDialog.FileName;
+                    text = File.ReadAllText(filenameRead);
+                }
+
+                text = Decrypt(text, key);
+                MessageBox.Show("Текст расшифрован, сохраняем в файл");
+
+                if (saveFileDialog.ShowDialog() == DialogResult.Cancel)
+                    return;
+                string filenameWrite = saveFileDialog.FileName;
+                System.IO.File.WriteAllText(filenameWrite, text);
+                MessageBox.Show("Полученный текст сохранен в файле");
+            }    
+                
 
 
         }
@@ -247,7 +256,7 @@ namespace DES
             int[] result = new int[8];
             string resultEnd = "";
 
-            CorrectLength(ref text, ref key);
+            CorrectLength(ref text);
             textBox1.Text = text;
             textBox2.Text = key;
 
@@ -311,19 +320,13 @@ namespace DES
             string cnt;
             int[] result = new int[8];
             string resultEnd = "";
-
             string[] rounds = Rounds(text);
 
             
             for (int k = 0; k < rounds.Length; k++)
             {
-                text = rounds[k];
 
-                if (key.Length < 8)
-                {
-                    MessageBox.Show("Ключ должен содержать не менее 8 символов.");
-                    break;
-                }
+                text = rounds[k];
 
                 text = ConvertBinary(ConvertASCII(text), 8);
                 key = ConvertBinary(ConvertASCII(key), 8);
@@ -374,21 +377,10 @@ namespace DES
             }
             return resultEnd;
         }
-        private void CorrectLength(ref string text, ref string key) // доводим текст до требуемой длины
+        private void CorrectLength(ref string text) // доводим текст до требуемой длины
         {
             while ((text.Length * 8) % sizeOfBlock != 0)
                 text += "*";
-
-            if (key.Length > 8)
-            {
-                key = key.Remove(8);
-            }
-            else
-            {
-                MessageBox.Show("Длина ключе меньше 8 символов. Длина ключа будет скорректирована автоматически.");
-                while (key.Length != 8)
-                    key += "*";
-            }
         }
         private int[] ConvertASCII(string text) // переводим символ в ASCII
         {
@@ -532,6 +524,16 @@ namespace DES
             return blocks;
         }
 
+        private bool CorrectKey(string key)
+        {
+            if (key.Length > 8 || key.Length < 8)
+            {
+                MessageBox.Show("Некорректный ввод ключа. Ключ должен иметь длину 8 знаков", "Ошибка");
+                return false;
+            }
+            return true;
+        }
+
         private void button5_Click(object sender, EventArgs e)
         {
             textBox1.Clear();
@@ -545,7 +547,7 @@ namespace DES
         private void button7_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Стандарт шифрования данных DES – блочный шифр с симметричными ключами, разработан Национальным Институтом Стандартов и Технологии." +
-                "\nDES создает 16 раундовых ключей ki по 48 битов из ключа k шифра на 56 битов.Однако, чтобы задать ключ шифра надо среди 56 битов ключа дополнительно вписать 8 битов в позиции 8, 16, ..., 64 для проверки четности таким образом, чтобы каждый байт содержал нечетное число единиц." +
+                "\nDES создает 16 раундовых ключей ki по 48 битов из ключа k шифра на 56 битов. Однако, чтобы задать ключ шифра надо среди 56 битов ключа дополнительно вписать 8 битов в позиции 8, 16, ..., 64 для проверки четности таким образом, чтобы каждый байт содержал нечетное число единиц." +
                 "\nС помощью этой операции выявляют ошибки при обмене и хранении ключей." +
                 "\nДля того чтобы, размер блока соответствовал значению 64 бита, программа добавляет знак * и ключ должен соответствовать 8 знаком, тогда программа произведет шифрование текста.",
                 "Информация о программе");
