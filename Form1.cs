@@ -314,9 +314,16 @@ namespace DES
 
             string[] rounds = Rounds(text);
 
+            
             for (int k = 0; k < rounds.Length; k++)
             {
                 text = rounds[k];
+
+                if (key.Length < 8)
+                {
+                    MessageBox.Show("Ключ должен содержать не менее 8 символов.");
+                    break;
+                }
 
                 text = ConvertBinary(ConvertASCII(text), 8);
                 key = ConvertBinary(ConvertASCII(key), 8);
@@ -378,6 +385,7 @@ namespace DES
             }
             else
             {
+                MessageBox.Show("Длина ключе меньше 8 символов. Длина ключа будет скорректирована автоматически.");
                 while (key.Length != 8)
                     key += "*";
             }
@@ -522,6 +530,30 @@ namespace DES
                 cnt += 8;
             }
             return blocks;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            textBox3.Clear();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Стандарт шифрования данных DES – блочный шифр с симметричными ключами, разработан Национальным Институтом Стандартов и Технологии." +
+                "\nDES создает 16 раундовых ключей ki по 48 битов из ключа k шифра на 56 битов.Однако, чтобы задать ключ шифра надо среди 56 битов ключа дополнительно вписать 8 битов в позиции 8, 16, ..., 64 для проверки четности таким образом, чтобы каждый байт содержал нечетное число единиц." +
+                "\nС помощью этой операции выявляют ошибки при обмене и хранении ключей." +
+                "\nДля того чтобы, размер блока соответствовал значению 64 бита, программа добавляет знак * и ключ должен соответствовать 8 знаком, тогда программа произведет шифрование текста.",
+                "Информация о программе");
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
