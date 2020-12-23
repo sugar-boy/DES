@@ -253,24 +253,21 @@ namespace DES
             string resultEnd = "";
 
             CorrectLength(ref text);
-            textBox1.Text = text;
-            textBox2.Text = key;
             textBox3.Clear();
 
             string[] rounds = Rounds(text);
+
+            key = ConvertBinary(ConvertASCII(key), 8);
+            PermutationArray(key, secondArray, out string resultKey);
+            Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
 
             for (int k = 0; k < rounds.Length; k++)
             {
                 text = rounds[k];
 
                 text = ConvertBinary(ConvertASCII(text), 8);
-                key = ConvertBinary(ConvertASCII(key), 8);
-
                 PermutationArray(text, firstArray, out string resultText);
-                PermutationArray(key, secondArray, out string resultKey);
-
                 Division(resultText, out string divisionLeftText, out string divisionRightText); ;
-                Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
 
                 for (int i = 1; i <= 16; i++)
                 {
@@ -320,20 +317,18 @@ namespace DES
             string[] rounds = Rounds(text);
             textBox3.Clear();
 
+            key = ConvertBinary(ConvertASCII(key), 8);
+            PermutationArray(key, secondArray, out string resultKey);
+            Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
+
             for (int k = 0; k < rounds.Length; k++)
             {
-
                 text = rounds[k];
 
                 text = ConvertBinary(ConvertASCII(text), 8);
-                key = ConvertBinary(ConvertASCII(key), 8);
-
                 PermutationArray(text, firstArray, out string resultText);
-                PermutationArray(key, secondArray, out string resultKey);
-
                 Division(resultText, out string divisionLeftText, out string divisionRightText); ;
-                Division(resultKey, out string divisionLeftKey, out string divisionRightKey);
-
+             
                 for (int i = 16; i >= 1; i--)
                 {
                     int n = 0;
